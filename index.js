@@ -13,7 +13,6 @@ const PRIVATE_APP_ACCESS = process.env.PRIVATE_APP_ACCESS;
 const CUSTOM_OBJECT_ID = process.env.CUSTOM_OBJECT_ID || '2-269673169';
 
 // TODO: ROUTE 1 - Create a new app.get route for the homepage to call your custom object data. Pass this data along to the front-end and create a new pug template in the views folder.
-
 app.get('/', async (req, res) => {
     const customObjectsUrl = `https://api.hubspot.com/crm/v3/objects/${CUSTOM_OBJECT_ID}?properties=name,game,platform`;
     const headers = {
@@ -35,7 +34,6 @@ app.get('/', async (req, res) => {
 });
 
 // TODO: ROUTE 2 - Create a new app.get route for the form to create or update new custom object data. Send this data along in the next route.
-
 app.get('/update-cobj', (req, res) => {
     res.render('updates', {
         title: 'Update Custom Object Form | Integrating With HubSpot I Practicum'
@@ -43,8 +41,29 @@ app.get('/update-cobj', (req, res) => {
 });
 
 // TODO: ROUTE 3 - Create a new app.post route for the custom objects form to create or update your custom object data. Once executed, redirect the user to the homepage.
+app.post('/update-cobj', async (req, res) => {
+    const createUrl = `https://api.hubspot.com/crm/v3/objects/${CUSTOM_OBJECT_ID}`;
+    const headers = {
+        Authorization: `Bearer ${PRIVATE_APP_ACCESS}`,
+        'Content-Type': 'application/json'
+    };
 
-// * Code for Route 3 goes here
+    const newRecord = {
+        properties: {
+            name: req.body.name,
+            game: req.body.game,
+            platform: req.body.platform
+        }
+    };
+
+    try {
+        await axios.post(createUrl, newRecord, { headers });
+        res.redirect('/');
+    } catch (error) {
+        console.error('Error creating custom object record:', error.response ? error.response.data : error.message);
+        res.status(500).send('Error creating custom object record.');
+    }
+});
 
 /** 
 * * This is sample code to give you a reference for how you should structure your calls. 
